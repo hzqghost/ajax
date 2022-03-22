@@ -1,163 +1,107 @@
-/**
-* qg Ajax
-*/
-function createAjaxObject(){
+function newAjax(){
 	return {
-		options:{
-			dataType:'json', //json or text
-			method:'POST',
-			contentType:'application/x-www-form-urlencoded',
-			header:null,
-			async:true,
-			url:'',
-			username:'',
-			password:'',
-			params:null,
-			timeout:120 * 1000,
-			ext:{
-				url:'',
-				header:null,
-				params:null,
-				then:null,
-				catch:null,
-				callback:null,
-			}
+		o:{
+			dataType:'json',method:'POST',contentType:'application/x-www-form-urlencoded',
+			header:null,async:true,url:'',user:'',pass:'',params:null,timeout:90000,
+			ext:{url:'',header:null,params:null,then:null,catch:null,callback:null,}
 		},
-		dataType(value){this.options.dataType=value;return this;},
-		contentType(value){this.options.contentTyp=value;return this;},
-		header(value){this.options.header=value;return this;},
-		username(value){this.options.username=value;return this;},
-		password(value){this.options.password=value;return this;},
-		timeout(value){this.options.timeout=value;return this;},
+		dataType(v){ this.o.dataType=v;return this; },
+		contentType(v){ this.o.contentType=v;return this; },
+		header(v){ this.o.header=v;return this; },
+		user(v){ this.o.user=v;return this; },
+		pass(v){ this.o.pass=v;return this; },
+		timeout(v){ this.o.timeout=v;return this; },
 		get(url,params=null){
-			this.options.async = true; this.options.method = 'GET';this.options.url = url;this.options.params = params;
-			return this.exec(this.options);
+			this.o.async = true; this.o.method = 'GET';this.o.url = url;this.o.params = params;
+			return this.exec(this.o);
 		},
 		getWait(url,params,callback){
 			if(typeof(callback)==='undefined'){
-				console.error('getWait need a function callback');
+				console.error('getWait need a function callback'); 
 				return null;
 			}
-			this.options.async = false;this.options.method = 'GET';this.options.url = url;this.options.params = params;
-			return this.exec(this.options,callback);
+			this.o.async = false;this.o.method = 'GET';this.o.url = url;this.o.params = params;
+			return this.exec(this.o,callback);
 		},
 		post(url,params=null){
-			this.options.async = true; this.options.method = 'POST';this.options.url = url;this.options.params = params;
-			return this.exec(this.options);
+			this.o.async = true; this.o.method = 'POST';this.o.url = url;this.o.params = params;
+			return this.exec(this.o);
 		},
 		postWait(url,params,callback){
 			if(typeof(callback)==='undefined'){
 				console.error('postWait need a function callback');
 				return null;
 			}
-			this.options.async = false;this.options.method = 'POST';this.options.url = url;this.options.params = params;
-			return this.exec(this.options,callback);
+			this.o.async = false;this.o.method = 'POST';this.o.url = url;this.o.params = params;
+			return this.exec(this.o,callback);
 		},
-		//json to &
-		raw(data){
-			if(!data) return null;
+		raw(v){
+			if(!v) return null;
 			var a = [];
-			if (data.constructor == Array) {
-				for (var i = 0; i < data.length; i ++) {
-					a.push(data[i].name + "=" + encodeURIComponent(data[i].value));
-				}
-			} else {
-				for (var i in data) {
-					a.push(i + "=" + encodeURIComponent(data[i]));
-				}
-			}
+			if(v.constructor == Array)
+				for (var i=0;i<v.length;i++) a.push(v[i].name + "=" + encodeURIComponent(v[i].value));
+			else
+				for(var i in v) a.push(i + "=" + encodeURIComponent(v[i]));
 			return a.join("&");
 		},
-		error:function(options,resolve,err){
-			if(options.ext.catch){
-				options.ext.catch(err);
-			}else{
-				resolve(err);
-			}
+		error:function(o,resolve,err){
+			o.ext.catch ? o.ext.catch(err) : resolve(err);
 		},
-		exec(options,callback){
-			var self = this;
+		exec(o,callback){
 			if(typeof(callback)==='undefined') callback = null;
+			var self = this;
 			var ref = {resolve:null,reject:null};
-			var promise = new Promise((resolve, reject) => {
-				ref.resolve = resolve;
-				ref.reject = reject;
-			});
-			if(options.ext.begin){
-				options.ext.begin();
-			}
-			if(options.ext.url){
-				options.url = options.ext.url + options.url;
-			}
-			if(options.ext.header){
-				if(options.header){
-					options.header = {...options.ext.header,...options.header};
-				}else{
-					options.header = optons.apiHeader;
-				}
-			}
-			if(options.ext.params){
-				if(options.params){
-					options.params = {...options.ext.params,...options.params};
-				}else{
-					options.params = options.ext.params;
-				}
-			}
+			var promise = new Promise((resolve, reject) => { ref.resolve = resolve; ref.reject = reject; });
+			if(o.ext.begin)  o.ext.begin();
+			if(o.ext.url)    o.url = o.ext.url + o.url;
+			if(o.ext.header) o.header = (o.header) ? {...o.ext.header,...o.header} : o.ext.header;
+			if(o.ext.params) o.params = (o.params) ? {...o.ext.params,...o.params} : o.ext.params;
 			var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 			try{
-				xhr.open(options.method, options.url, options.async,options.username, options.password);
-				if(options.async){
-					xhr.timeout = options.timeout;
+				var url = o.url;
+				if(o.method=='GET' && o.params) url = url + ((url.indexOf('?')===-1)?'?':'&') + this.raw(o.params);
+				xhr.open(o.method, url, o.async,o.user, o.pass);
+				if(o.async){
+					xhr.timeout = o.timeout;
 					xhr.ontimeout = function (e) {
-						self.error(options,ref.reject,{code:-4,msg:'ajax timeout:'+options.timeout, e:options, res:''});
+						self.error(o,ref.reject,{code:-4,msg:'ajax timeout:'+o.timeout, e:o, res:''});
 					};
 				}
 				xhr.addEventListener('error', function handleEvent(e) {
-					self.error(options,ref.reject,{code:-4,msg:'ajax error type:'+e.type +', loaded:'+ e.loaded, e:options, res:''});
+					self.error(o,ref.reject,{code:-4,msg:'ajax error type:'+e.type +', loaded:'+ e.loaded, e:o, res:''});
 				});
 				xhr.onreadystatechange = function () {
 					if (xhr.readyState == 4) {
 						if (xhr.status == 200 || xhr.status == 0) {
-							if(options.dataType =='json'){
+							var response = xhr.responseText;
+							if(o.dataType =='json'){
 								try{
-									response = eval("(" + xhr.responseText + ")");
+									response = eval("(" + response + ")");
 								}catch(e){
-									self.error(options,ref.reject,{code:-5,msg:'json format or url is error', e:options, text:xhr.responseText});
+									self.error(o,ref.reject,{code:-5,msg:'json format or url is error', e:o, text:response});
 									return;
 								}
-							}else{
-								response = xhr.responseText;
 							}
 							if(callback){
-								if(options.ext.callback){
-									response = options.ext.callback(response,options,ref.resolve,ref.reject);
-								}
+								if(o.ext.callback) response = o.ext.callback(response,o,ref.resolve,ref.reject);
 								callback(response);
 							}else{
-								if(options.ext.then){
-									options.ext.then(response,options,ref.resolve,ref.reject);
-								}else{
-									ref.resolve(response);
-								}
+								o.ext.then ? o.ext.then(response,o,ref.resolve,ref.reject) : ref.resolve(response);
 							}
 						}else{
-							self.error(options,ref.reject,{code:-3,msg:'ajax http status is error:'+xhr.status, e:options, res:''});
+							self.error(o,ref.reject,{code:-3,msg:'ajax http status is error:'+xhr.status, e:o, res:''});
 						}
 					}
 				};
-				if(options.method == 'POST'){
-					xhr.setRequestHeader('Content-type', options.contentType);  //POST设置为表单方式提交
-				}
-				for(var k in options.header){
-					xhr.setRequestHeader(k, options.header[k]); 
-				}
+				if(o.method == 'POST') xhr.setRequestHeader('Content-type', o.contentType);
+				for(var k in o.header) xhr.setRequestHeader(k, o.header[k]); 
 				try{
-					xhr.send(this.raw(options.params));
+					(o.method=='POST') ? xhr.send(this.raw(o.params)) : xhr.send();
 				}catch(e){
-					this.error(options,ref.reject,{code:-2,msg:'ajax send error', e:options, res:''});
+					this.error(o,ref.reject,{code:-2,msg:'ajax send error', e:o, res:''});
 				}
 			}catch(e){
-				this.error(options,ref.reject,{code:-1,msg:'ajax create XMLHttpRequest error', e:options, res:''});
+				this.error(o,ref.reject,{code:-1,msg:'ajax create XMLHttpRequest error', e:o, res:''});
 			}
 			return promise;
 		},
