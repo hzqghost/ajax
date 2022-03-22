@@ -1,3 +1,4 @@
+/**author:313143468@qq.com */
 function newAjax(){
 	return {
 		o:{
