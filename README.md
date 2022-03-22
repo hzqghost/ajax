@@ -1,5 +1,5 @@
 <h1>A short code JS Ajax library that supports chained calls and synchronous and asynchronous requests</h1>
-<h2>一个短小的代码的 js ajax 库, 支持链式调用, 支持同步与异步请求。</h2>
+<h2>一个短小的功能齐全的 js ajax 库(100行), 支持链式调用, 支持同步与异步请求。</h2>
 
 #simple example (简单例子)
 <pre>
