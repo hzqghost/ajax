@@ -26,6 +26,7 @@ api.o.ext.begin = function(){
   api.o.ext.header = null; // {key1:value1,key2:value2}
   api.o.ext.params = null; // {key1:value1,key2:value2}
 };
+
 //revised data, only the data part with code is 0(修正数据,仅返回 code == 0 的 data部份)
 api.o.ext.callback = function(response,o,resolve,reject){
   if(response.code == 0){
@@ -35,6 +36,7 @@ api.o.ext.callback = function(response,o,resolve,reject){
     return null;
   }
 };
+
 //use with callback(与callback配合使用)
 api.o.ext.then = function(response,o,resolve,reject){
   response = api.o.ext.callback(response);
@@ -42,6 +44,7 @@ api.o.ext.then = function(response,o,resolve,reject){
     resolve(response);
   }
 };
+
 //general error handling(通用错误处理)
 api.o.ext.catch = function(err){
   if(err.code<0){
@@ -59,23 +62,34 @@ api.post('/app/menus',{param1:123,param2:"abc"})
 更多(more)
 <pre>
 var ajax = newAjax(); 
+</pre>
 
-//return data type,  json or text
+return data type,  json or text
+<pre>
 ajax.dataType('text').post('http://').then();
+</pre>
 
-//set header Content-type,  default is application/x-www-form-urlencoded
+set header Content-type,  default is application/x-www-form-urlencoded
+<pre>
 ajax.contentType('application/x-www-form-urlencoded').post('http://').then();
+</pre>
 
-//set header,  default null
+set header,  default null
+<pre>
 ajax.header({key1:'value1',key2:'value2'}).post('http://').then();
+</pre>
 
-//set username,  default ''
+set username,  default ''
+<pre>
 ajax.user('username').post('http://').then();
+</pre>
 
-//set password,  default ''
+set password,  default ''
+<pre>
 ajax.pass('password').post('http://').then();
+</pre>
 
-//set timeout, valid when asynchronous, millisecond, default 90000,(异步时有效，单位毫秒)
+set timeout, valid when asynchronous, millisecond, default 90000,(异步时有效，单位毫秒)
+<pre>
 ajax.timeout(5000).post('http://').then();
-
 </pre>
